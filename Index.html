@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <title>မြန်မာဘာသာ OCR</title>
+    <style>
+        body {
+            font-family: Arial, 'Pyidaungsu', sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        #imageUpload {
+            display: none;
+        }
+        #uploadButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #resultArea {
+            margin-top: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+        #processedImage {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>မြန်မာဘာသာ OCR</h1>
+    
+    <label id="uploadButton" for="imageUpload">
+        ဓာတ်ပုံရွေးရန်
+    </label>
+    <input type="file" id="imageUpload" accept="image/*">
+    
+    <div id="resultArea">
+        <p>ဓာတ်ပုံတွင် ပါဝင်သော စာသားများကို ဖတ်ရန် ဓာတ်ပုံတစ်ပုံကို ရွေးချယ်ပါ</p>
+    </div>
+    
+    <img id="processedImage" alt="processed image">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/2.1.0/tesseract.min.js"></script>
+    <script>
+        const uploadButton = document.getElementById('uploadButton');
+        const imageUpload = document.getElementById('imageUpload');
+        const resultArea = document.getElementById('resultArea');
+        const processedImage = document.getElementById('processedImage');
+
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    processedImage.src = event.target.result;
+                    
+                    // Tesseract OCR processing
+                    Tesseract.recognize(
+                        event.target.result,
+                        'mya', // Myanmar language
+                        { 
+                            logger: m => {
+                                resultArea.innerHTML = `Processing: ${m.status} (${Math.round(m.progress * 100)}%)`;
+                            }
+                        }
+                    ).then(({ data: { text } }) => {
+                        resultArea.innerHTML = `
+                            <h3>OCR ရလဒ်:</h3>
+                            <p>${text || 'မည်သည့်စာသားမျှ မတွေ့ရပါ'}</p>
+                        `;
+                    }).catch(err => {
+                        resultArea.innerHTML = `Error: ${err.message}`;
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
